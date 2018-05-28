@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>js-V-module</title>
+</head>
+<body>
+    <input v-value="value" type="text" id="input">
+    <div v-text="value" id="el"></div>
+    <script>
+        //  获取 元素
+        var elems = [
+            document.getElementById('el'), 
+            document.getElementById('input')
+        ];
+        // 定义一个默认数据
+        var data = {
+            value: 'hello!'
+        };
+        // 
+        var command = {
+            text: function(str){
+                this.innerHTML = str;
+            },
+            value: function(str){
+                this.setAttribute('value', str);
+            }
+        };
+
+        var scan = function(){        
+            /**
+             * 查找带 自定义的属性的 元素
+             */
+            for(var i = 0, len = elems.length; i < len; i++){
+                var elem = elems[i];
+                elem.command = [];
+                for(var j = 0, len1 = elem.attributes.length; j < len1; j++){
+                    var attr = elem.attributes[j];
+                    if(attr.nodeName.indexOf('v-') >= 0){
+                        /**
+                         * 调用属性指令，这里可以使用数据改变检测
+                         */
+                        command[attr.nodeName.slice(2)].call(elem, data[attr.nodeValue]);
+                        elem.command.push(attr.nodeName.slice(2));
+                    }
+                }
+            }
+        }
+
+        /**
+         * 更新数据
+         */
+        function mvSet(key, value){
+            data[key] = value;
+            console.log(data[key])
+            scan();
+        }
+        /**
+         * 监听新的值 并传递
+         */
+        elems[1].addEventListener('keyup', function(e){
+            mvSet('value', e.target.value);
+        }, false);
+
+        scan();
+
+        /**
+         * 给input 传递默认值
+         */
+        setTimeout(function(){
+            mvSet('value', 'hellow modle！');
+        },1)
+
+    </script>
+</body>
+</html>
